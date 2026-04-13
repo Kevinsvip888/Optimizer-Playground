@@ -1,14 +1,14 @@
 # Optimizer-Playground
 An interactive web app for visualizing and comparing how deep learning optimizers converge on objective functions.
 
-<img width="1058" height="942" alt="image" src="https://github.com/user-attachments/assets/558cd1ba-572c-4198-8067-68b37eaa62d7" />
+
 
 **Optimizer-Playground** is an interactive web application for visualizing how deep learning optimizers such as **Adam** converge on objective functions. It helps users build intuition about optimization dynamics by comparing optimizer trajectories, convergence speed, and behavior across different loss landscapes.
 
 ## Live Demo
 
 https://kevinsvip888.github.io/Optimizer-Playground/
-
+<img width="1058" height="942" alt="image" src="https://github.com/user-attachments/assets/558cd1ba-572c-4198-8067-68b37eaa62d7" />
 
 ## Overview
 
