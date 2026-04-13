@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://kevinsvip888.github.io/Optimizer-Playground/sitemap.xml
