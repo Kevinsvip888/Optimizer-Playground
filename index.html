@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gradient Descent — Optimizer Playground</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/plotly.js-dist@2.27.0/plotly.min.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="noise"></div>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="wordmark">
+      <span class="wordmark-main"><span>∇</span> Optimizer Lab</span>
+      <span class="wordmark-sub">gradient descent · 3d visualization</span>
+    </div>
+    <nav class="header-nav">
+      <a href="#how-to-use" class="nav-link">how to use</a>
+      <a href="#about" class="nav-link">about</a>
+    </nav>
+  </div>
+</header>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-tag">interactive playground</div>
+    <h1 class="hero-title">Watch optimizers<br><em>find the minimum</em></h1>
+    <p class="hero-desc">Define any loss function, pick your optimizers, and watch them race down the loss landscape in real time. Compare SGD, Momentum, Adam, AdamW and more — side by side.</p>
+    <a href="#playground" class="hero-cta">open playground <span class="arrow">↓</span></a>
+  </div>
+  <div class="hero-bg-grid"></div>
+</section>
+
+<!-- How to use -->
+<section class="how-to-use" id="how-to-use">
+  <div class="section-inner">
+    <div class="section-label">getting started</div>
+    <h2 class="section-title">How to use</h2>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">01</div>
+        <div class="step-icon">ƒ</div>
+        <h3>Define your function</h3>
+        <p>Type any expression in <code>x0</code> and <code>x1</code>. Use <code>Math.sin</code>, <code>Math.exp</code>, <code>**</code> for powers, and more. Or pick a preset to start immediately.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">02</div>
+        <div class="step-icon">⚡</div>
+        <h3>Select optimizers</h3>
+        <p>Toggle any combination of the 7 available optimizers. Each one gets its own color track on the 3D surface and its own hyperparameter controls.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">03</div>
+        <div class="step-icon">🎛</div>
+        <h3>Tune hyperparameters</h3>
+        <p>Adjust the shared learning rate and iteration count, plus per-optimizer settings like momentum β, decay ρ, and weight decay λ.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">04</div>
+        <div class="step-icon">◎</div>
+        <h3>Explore the surface</h3>
+        <p>Drag to rotate, scroll to zoom. The gold ◆ marks the global minimum. The results table ranks all active optimizers by final loss.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Playground -->
+<section class="playground" id="playground">
+  <div class="playground-inner">
+
+    <div class="panel-label">playground</div>
+
+    <!-- Function input -->
+    <div class="card function-card">
+      <div class="card-header">
+        <span class="card-title">Loss function</span>
+        <span class="card-hint">use x0, x1, Math.sin, Math.exp, Math.abs, **</span>
+      </div>
+      <div class="fn-row">
+        <span class="fn-prefix">f(x₀, x₁) =</span>
+        <input type="text" id="fn-input" value="x0**2 + x1**2" class="fn-input" placeholder="e.g. x0**2 + x1**2" autocomplete="off" spellcheck="false">
+        <select id="grad-mode" class="select-input">
+          <option value="auto">∇ auto (numerical)</option>
+          <option value="manual">∇ manual</option>
+        </select>
+        <button class="btn-apply" onclick="applyFn()">Apply <span>→</span></button>
+      </div>
+      <div id="manual-grad" style="display:none;" class="manual-grad-row">
+        <div class="grad-field">
+          <label>∂f/∂x₀ =</label>
+          <input type="text" id="grad0-input" value="2*x0" class="fn-input" spellcheck="false">
+        </div>
+        <div class="grad-field">
+          <label>∂f/∂x₁ =</label>
+          <input type="text" id="grad1-input" value="2*x1" class="fn-input" spellcheck="false">
+        </div>
+      </div>
+      <div class="presets-row">
+        <span class="presets-label">Presets</span>
+        <button class="preset-btn active" onclick="setPreset('x0**2 + x1**2','2*x0','2*x1',this)">bowl</button>
+        <button class="preset-btn" onclick="setPreset('x0**2 - x1**2','2*x0','-2*x1',this)">saddle</button>
+        <button class="preset-btn" onclick="setPreset('(1-x0)**2 + 100*(x1-x0**2)**2','2*(x0-1) - 400*x0*(x1-x0**2)','200*(x1-x0**2)',this)">rosenbrock</button>
+        <button class="preset-btn" onclick="setPreset('Math.sin(x0*2) + Math.cos(x1*2)','2*Math.cos(x0*2)','-2*Math.sin(x1*2)',this)">sin + cos</button>
+        <button class="preset-btn" onclick="setPreset('Math.sqrt(Math.abs(x0)) + x1**3','0.5/Math.sqrt(Math.abs(x0)+1e-8)','3*x1**2',this)">original</button>
+        <button class="preset-btn" onclick="setPreset('x0**4 - 16*x0**2 + 5*x0 + x1**2','4*x0**3 - 32*x0 + 5','2*x1',this)">double well</button>
+      </div>
+      <div id="error-msg" class="error-msg" style="display:none;"></div>
+    </div>
+
+    <!-- Optimizer selector -->
+    <div class="card optimizer-card">
+      <div class="card-header">
+        <span class="card-title">Optimizers</span>
+        <span class="card-hint">toggle to compare — at least one must be active</span>
+      </div>
+      <div class="optimizer-grid" id="optimizer-toggles"></div>
+    </div>
+
+    <!-- Controls -->
+    <div class="card controls-card">
+      <div class="card-header">
+        <span class="card-title">Shared controls</span>
+        <span class="card-hint">applies to all active optimizers</span>
+      </div>
+      <div class="controls-grid">
+        <div class="slider-group">
+          <div class="slider-label">
+            <span>Learning rate</span>
+            <span class="slider-val" id="lr-display">0.050</span>
+          </div>
+          <input type="range" min="1" max="500" value="50" step="1" id="lr-slider" class="slider">
+          <div class="slider-bounds"><span>0.001</span><span>0.500</span></div>
+        </div>
+        <div class="slider-group">
+          <div class="slider-label">
+            <span>Iterations</span>
+            <span class="slider-val" id="iter-display">100</span>
+          </div>
+          <input type="range" min="10" max="2000" value="100" step="10" id="iter-slider" class="slider">
+          <div class="slider-bounds"><span>10</span><span>2000</span></div>
+        </div>
+        <div class="slider-group">
+          <div class="slider-label">
+            <span>Start x₀</span>
+            <span class="slider-val" id="x0-display">—</span>
+          </div>
+          <input type="range" min="-3" max="3" value="2.4" step="0.03" id="x0-slider" class="slider">
+          <div class="slider-bounds"><span id="x0-lb">—</span><span id="x0-ub">—</span></div>
+        </div>
+        <div class="slider-group">
+          <div class="slider-label">
+            <span>Start x₁</span>
+            <span class="slider-val" id="x1-display">—</span>
+          </div>
+          <input type="range" min="-3" max="3" value="2.4" step="0.03" id="x1-slider" class="slider">
+          <div class="slider-bounds"><span id="x1-lb">—</span><span id="x1-ub">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Per-optimizer params -->
+    <div class="card" id="opt-params-card" style="display:none;">
+      <div class="card-header">
+        <span class="card-title">Optimizer hyperparameters</span>
+        <span class="card-hint">fine-tune each active optimizer</span>
+      </div>
+      <div class="opt-params-grid" id="opt-params"></div>
+    </div>
+
+    <!-- Global min banner -->
+    <div id="global-min-banner" style="display:none;" class="global-min-banner"></div>
+
+    <!-- 3D Plot -->
+    <div class="card plot-card">
+      <div class="plot-card-header-row">
+        <div class="plot-card-header-left">
+          <span class="card-title">Loss landscape</span>
+          <span class="card-hint">drag to rotate · scroll to zoom · hover for values</span>
+        </div>
+        <div class="plot-controls">
+          <div class="anim-speed-group">
+            <span>speed</span>
+            <input type="range" min="1" max="20" value="8" step="1" id="anim-speed" class="slider" style="width:80px;">
+            <span id="anim-speed-display">8</span>
+          </div>
+          <span class="anim-step-display" id="anim-step-display">step 0 / 0</span>
+          <button class="btn-play" id="btn-play" onclick="toggleAnimation()">
+            <svg id="play-icon" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+            <svg id="pause-icon" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="3" width="4" height="18"/><rect x="14" y="3" width="4" height="18"/></svg>
+            <span id="play-label">Play</span>
+          </button>
+        </div>
+      </div>
+      <div class="anim-progress"><div class="anim-progress-bar" id="anim-progress-bar"></div></div>
+      <div id="plot" class="plot-container"></div>
+    </div>
+
+    <!-- Results -->
+    <div class="card results-card" id="results-card" style="display:none;">
+      <div class="card-header">
+        <span class="card-title">Results</span>
+        <span class="card-hint">ranked by final loss</span>
+      </div>
+      <div class="results-table-wrap">
+        <table class="results-table" id="results-tbl">
+          <thead><tr id="results-head"></tr></thead>
+          <tbody id="results-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="legend-row" id="legend-row"></div>
+
+  </div>
+</section>
+
+<!-- About -->
+<section class="about" id="about">
+  <div class="section-inner">
+    <div class="section-label">reference</div>
+    <h2 class="section-title">Optimizer reference</h2>
+    <div class="algo-grid">
+      <div class="algo-card">
+        <div class="algo-name" style="color:#378ADD">SGD</div>
+        <div class="algo-eq">x ← x − α·∇f(x)</div>
+        <p>Vanilla gradient descent. Simple and interpretable, but slow on ill-conditioned problems and sensitive to learning rate choice.</p>
+      </div>
+      <div class="algo-card">
+        <div class="algo-name" style="color:#1D9E75">Momentum</div>
+        <div class="algo-eq">v ← βv + α·∇f(x) &nbsp; x ← x − v</div>
+        <p>Accumulates a velocity vector to dampen oscillations and accelerate in consistent gradient directions. Think of a ball rolling down a hill.</p>
+      </div>
+      <div class="algo-card">
+        <div class="algo-name" style="color:#D4537E">Nesterov</div>
+        <div class="algo-eq">∇f(x − β·v) &nbsp; (lookahead)</div>
+        <p>Evaluates the gradient at the anticipated future position, giving a "look before you leap" correction that improves convergence.</p>
+      </div>
+      <div class="algo-card">
+        <div class="algo-name" style="color:#BA7517">AdaGrad</div>
+        <div class="algo-eq">G ← G + g²  &nbsp; x ← x − α·g/√G</div>
+        <p>Adapts the learning rate per parameter by accumulating squared gradients. Excellent for sparse data; can stall on dense problems.</p>
+      </div>
+      <div class="algo-card">
+        <div class="algo-name" style="color:#7F77DD">RMSProp</div>
+        <div class="algo-eq">E ← ρE + (1−ρ)g²  &nbsp; x ← x − α·g/√E</div>
+        <p>Fixes AdaGrad's vanishing learning rate by using an exponential moving average of squared gradients instead of a running sum.</p>
+      </div>
+      <div class="algo-card">
+        <div class="algo-name" style="color:#D85A30">Adam</div>
+        <div class="algo-eq">m̂ = m/(1−β₁ᵗ) &nbsp; v̂ = v/(1−β₂ᵗ)</div>
+        <p>Combines Momentum and RMSProp with bias correction for both moment estimates. The most widely used optimizer in deep learning.</p>
+      </div>
+      <div class="algo-card">
+        <div class="algo-name" style="color:#993C1D">AdamW</div>
+        <div class="algo-eq">x ← x(1−αλ) − α·m̂/√v̂</div>
+        <p>Adam with weight decay applied directly to parameters rather than the gradient — the correct way to do L2 regularization with adaptive optimizers.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>∇ Optimizer Lab</span>
+    <span>built with Plotly.js · no frameworks · open source</span>
+  </div>
+</footer>
+
+<script src="optimizers.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
