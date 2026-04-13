@@ -1,7 +1,10 @@
 # Optimizer-Playground
 An interactive web app for visualizing and comparing how deep learning optimizers converge on objective functions.
 
-![Optimizers Animation](optimizer_animation.gif)
+<p align="center">
+  <img src="optimizer_animation.gif" alt="OptiScope optimizer visualization" width="600">
+</p>
+
 
 **Optimizer-Playground** is an interactive web application for visualizing how deep learning optimizers such as **Adam** converge on objective functions. It helps users build intuition about optimization dynamics by comparing optimizer trajectories, convergence speed, and behavior across different loss landscapes.
 
