@@ -2,7 +2,7 @@
 An interactive web app for visualizing and comparing how deep learning optimizers converge on objective functions.
 
 <p align="center">
-  <img src="optimizer_animation.gif" alt="OptiScope optimizer visualization" width="600">
+  <img src="optimizer_animation.gif" alt="OptiScope optimizer visualization" width="400">
 </p>
 
 
